@@ -68,6 +68,46 @@ Expect to fix a variable or two on the first CI run. Open items:
   SD card node and OTG storage: please verify on the device.
 * Flashlight / vibrator / thermal paths are intentionally not set (not derivable from the image).
 
+## Finishing the open items (touch, decryption, brightness, super size)
+
+With the phone booted in Android (USB debugging on, root optional but recommended):
+
+```
+./tools/collect_device_info.sh                    # -> x6885_info.tar.gz
+python3 tools/apply_device_info.py x6885_info.tar.gz
+```
+The second step sets `TW_MAX_BRIGHTNESS`, the super size and CPU temp path, adds the touch
+modules (with dependencies, load order and `modules.dep`), and copies keymint/gatekeeper
+blobs into `recovery/root`. Commit, rebuild. Crypto blobs and rc files are copied as-is:
+review them if decryption still fails (SELinux labels and missing libraries are the usual cause).
+
+**No PC?** On a rooted phone run `su -c "sh /sdcard/Download/collect_on_device.sh"`
+(Termux or any root terminal). It writes `/sdcard/x6885_info.tar.gz`, same format as above.
+
+### Status of the data collected from a real X6885 (round 1)
+
+* Applied: `TW_MAX_BRIGHTNESS=5119`, super size `12934782976`, CPU temp `thermal_zone1`, touch `gt9896s.ko` + `tui-common.ko`
+  (Goodix SPI; the driver Android has loaded; all its dependencies are already in vendor_boot, vermagic matches).
+* Touch caveat: the phone also loads `focaltech_ft3683g` and `chipsemi_chsc5xxx_old` (`ro.tran.tp_switch.support=1`,
+  i.e. second-source touch panels). Which IC your unit uses is checked in round 2 (`logs/input_devices.txt`).
+* NOT applied yet: crypto blobs. The keymint/gatekeeper services only start after the **Trustonic** daemon (`mobicore`)
+  sets `ro.vendor.trustonic.ready`, so the daemon, `tee-service`, trustlets and their libraries are needed too:
+  run `tools/collect_round2.sh` (on-device, root) and send `x6885_round2.tar.gz`.
+
+### Round 2 results (applied)
+
+* Touch IC confirmed: **GT9896S** (SPI `spi1.0`, driver `GT9896S`). Only `gt9896s.ko` + `tui-common.ko` are loaded in recovery.
+* Decryption stack is **Trustonic TEE**. Installed in `recovery/root`: `mcDriverDaemon`, `vendor.trustonic.tee-service`,
+  keymint 3.0 + gatekeeper services, their vendor libraries, a minimal `/vendor/app/mcRegistry` (14 files, 0.8 MB: the drivers the
+  daemon loads + keymint/gatekeeper/keybox trustlets) and `system/etc/init/trustonic_recovery.rc` (mount persist at
+  `/mnt/vendor/persist`, start `mobicore`, then keymint/gatekeeper when `ro.vendor.trustonic.ready=true`).
+  The full 66 MB registry is deliberately NOT included (vendor_boot partition is 64 MiB).
+* Round 3 delivered the last 5 libraries (`android.hardware.common-V2-ndk`, `rkp-V1-ndk`, `secureclock-V1-ndk`,
+  `sharedsecret-V1-ndk`, `libtneclient`); `python3 tools/check_blobs.py` now reports every binary as resolved
+  (libc/libc++/liblog/libbase/libcutils/libutils/libbinder(_ndk)/libhidlbase/libselinux/libcrypto are expected from the recovery build).
+* Not replicated: `mtk_storageproxyd` (RPMB proxy) and SELinux labels. Services use `seclabel u:r:recovery:s0` and
+  run as root. If decryption fails, the first things to read are `logcat`/`dmesg | grep -i -E "mobicore|trustonic|keymint"` from the recovery.
+
 ## Refreshing from new firmware
 
 ```

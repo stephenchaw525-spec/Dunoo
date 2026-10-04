@@ -78,9 +78,9 @@ BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 
 # Dynamic partitions. The sizes below are build-system PLACEHOLDERS: they are
 # not used by the recovery at runtime. [verify: blockdev --getsize64 /dev/block/by-name/super]
-BOARD_SUPER_PARTITION_SIZE := 9126805504
+BOARD_SUPER_PARTITION_SIZE := 12934782976
 BOARD_SUPER_PARTITION_GROUPS := main
-BOARD_MAIN_SIZE := 9122611200
+BOARD_MAIN_SIZE := 12930588672
 BOARD_MAIN_PARTITION_LIST := system system_ext vendor product odm vendor_dlkm odm_dlkm system_dlkm
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_COPY_OUT_PRODUCT := product
@@ -124,8 +124,8 @@ TARGET_SCREEN_HEIGHT := 2400
 TARGET_SCREEN_DENSITY := 420
 # ^ [stock: panels are fhdp (1080x2400), ro.sf.lcd_density=420]
 TW_BRIGHTNESS_PATH := /sys/class/leds/lcd-backlight/brightness
-TW_MAX_BRIGHTNESS := 255
-TW_DEFAULT_BRIGHTNESS := 120
+TW_MAX_BRIGHTNESS := 5119
+TW_DEFAULT_BRIGHTNESS := 2559
 # ^ [verify: cat /sys/class/leds/lcd-backlight/max_brightness]
 TW_EXTRA_LANGUAGES := true
 TW_USE_TOOLBOX := true
@@ -160,3 +160,4 @@ OF_FIX_DECRYPTION_ON_DATA_MEDIA := 1
 OF_AB_DEVICE := 1
 FOX_AB_DEVICE := 1
 FOX_VIRTUAL_AB_DEVICE := 1
+TW_CUSTOM_CPU_TEMP_PATH := /sys/class/thermal/thermal_zone1/temp

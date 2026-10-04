@@ -228,3 +228,5 @@ tran_fp.ko
 mtk-pwm.ko
 mtk_irtx_pwm.ko
 tran_soft_restart.ko
+tui-common.ko
+gt9896s.ko
