@@ -146,7 +146,7 @@ TARGET_DEVICE_ALT := Infinix-X6885
 # ---------------------------------------------------------------- OrangeFox
 # Unknown variables are ignored by make, so both the OF_ and FOX_ spellings
 # are provided where the two manifest generations differ.
-OF_MAINTAINER := CHANGE_ME
+OF_MAINTAINER := Love
 OF_TARGET_DEVICES := X6885,Infinix-X6885
 OF_SCREEN_H := 2400
 OF_HIDE_NOTCH := 1
